@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#080a0d" />
+  <title>DEADLINE · 亡命公路</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main id="game-root">
+    <canvas id="game-canvas" aria-label="亡命公路赛车游戏"></canvas>
+
+    <div id="vignette"></div>
+    <div id="wet-overlay"></div>
+    <div id="speed-fx"></div>
+    <div id="damage-flash"></div>
+    <div id="lightning-flash"></div>
+    <div id="hurt-vignette"></div>
+
+    <div id="hud" class="hud">
+      <header class="hud-top">
+        <div class="brand-block">
+          <div class="brand-mark">D<span>//</span>07</div>
+          <div class="brand-copy">
+            <div class="brand-title">DEADLINE</div>
+            <div class="brand-sub">亡命公路 · 感染区</div>
+          </div>
+        </div>
+
+        <div class="score-block">
+          <span class="micro-label">SCORE</span>
+          <span id="scoreValue">0</span>
+          <span id="comboTag" class="combo-tag">×1</span>
+        </div>
+
+        <div class="top-status">
+          <div class="stat">
+            <span>最佳</span>
+            <b id="bestValue">0</b>
+          </div>
+          <div class="stat">
+            <span>里程</span>
+            <b><em id="distanceValue">0.0</em><small>KM</small></b>
+          </div>
+          <button id="muteBtn" class="icon-btn" type="button" title="声音开关 (M)" aria-label="声音开关">♪</button>
+        </div>
+      </header>
+
+      <aside class="hud-weather">
+        <div class="weather-panel">
+          <div id="weatherIcon" class="weather-icon">☀</div>
+          <div class="weather-copy">
+            <span class="micro-label">实时天气</span>
+            <strong id="weatherName">晴朗</strong>
+            <span id="weatherNext">能见度良好</span>
+          </div>
+        </div>
+        <div class="forecast">
+          <div class="forecast-head">
+            <span>天气演变</span>
+            <span id="weatherNextLabel">云层聚集</span>
+          </div>
+          <div class="forecast-track"><i id="weatherFill"></i></div>
+        </div>
+      </aside>
+
+      <div class="stage-chip">
+        <span class="pulse-dot"></span>
+        <span id="stageLabel">感染区 01</span>
+        <i></i>
+        <span>威胁等级 <b id="threatValue">低</b></span>
+      </div>
+
+      <footer class="hud-bottom">
+        <div class="vitals">
+          <div class="vital-row">
+            <span>车体完整度</span>
+            <b id="healthValue">100<span>%</span></b>
+          </div>
+          <div class="health-track"><i id="healthFill"></i><span class="health-ticks"></span></div>
+          <div class="combo-row">
+            <div class="combo-caption">
+              <span>连击倍率</span>
+              <b id="comboValue">×1</b>
+            </div>
+            <div class="combo-track"><i id="comboFill"></i></div>
+          </div>
+        </div>
+
+        <div id="boostHint" class="boost-hint">
+          <kbd>SHIFT</kbd>
+          <div><b>涡轮增压</b><span>按住持续加速</span></div>
+        </div>
+
+        <div class="speedometer">
+          <svg viewBox="0 0 140 140" aria-hidden="true">
+            <circle class="gauge-bg" cx="70" cy="70" r="57"></circle>
+            <circle class="gauge-ticks" cx="70" cy="70" r="63"></circle>
+            <circle id="speedArc" class="gauge-arc" cx="70" cy="70" r="57"></circle>
+          </svg>
+          <div class="speed-read">
+            <b id="speedValue">0</b>
+            <span>KM/H</span>
+          </div>
+          <div class="gear-read">GEAR <b id="gearValue">D</b></div>
+        </div>
+      </footer>
+
+      <div id="toastLayer" class="toast-layer" aria-live="polite"></div>
+
+      <div id="weatherAlert" class="weather-alert">
+        <div id="alertIcon">⛈</div>
+        <div>
+          <span>天气突变</span>
+          <strong id="alertName">雷暴</strong>
+        </div>
+      </div>
+
+      <div class="hint-bar">
+        <span><kbd>A</kbd><kbd>D</kbd> 转向</span>
+        <span><kbd>S</kbd> 刹车</span>
+        <span><kbd>SHIFT</kbd> 加速</span>
+        <span><kbd>P</kbd> 暂停</span>
+      </div>
+    </div>
+
+    <div id="touchControls" class="touch-controls">
+      <button id="touchLeft" class="touch-btn" type="button" aria-label="向左">◀</button>
+      <button id="touchRight" class="touch-btn" type="button" aria-label="向右">▶</button>
+      <button id="touchBoost" class="touch-btn boost" type="button" aria-label="加速">加速</button>
+    </div>
+
+    <section id="startScreen" class="overlay start-screen is-visible">
+      <div class="start-grid"></div>
+      <div class="start-content">
+        <div class="kicker"><i></i> PROCEDURAL HIGHWAY // THREE.JS</div>
+        <h1>
+          <span>DEADLINE</span>
+          <small>亡命公路</small>
+        </h1>
+        <p class="tagline">感染者封锁了 66 号公路。<br />把油门踩到底，在暴风雨吞没公路之前活着抵达下一个出口。</p>
+
+        <div class="feature-strip">
+          <span>实时天气</span><i></i>
+          <span>程序化公路</span><i></i>
+          <span>尸潮 AI</span><i></i>
+          <span>动态光影</span>
+        </div>
+
+        <div class="controls-grid">
+          <div><kbd>A</kbd><kbd>D</kbd><span>左右变道</span></div>
+          <div><kbd>SHIFT</kbd><span>涡轮加速</span></div>
+          <div><kbd>S</kbd><span>制动减速</span></div>
+          <div><kbd>P</kbd><span>暂停任务</span></div>
+        </div>
+
+        <div class="start-actions">
+          <button id="startBtn" class="primary-btn" type="button">
+            <span>点火出发</span>
+            <i>→</i>
+          </button>
+          <div class="best-record">
+            <span>历史最佳</span>
+            <b id="startBest">0</b>
+          </div>
+        </div>
+
+        <p class="start-warning">警告：碰撞会损伤车体。撞飞感染者可以获得分数，但活下来更重要。</p>
+      </div>
+
+      <footer class="start-footer">
+        <span>SECTOR 07 · EVACUATION ROUTE</span>
+        <span class="status-inline"><i></i> 系统在线</span>
+        <span>SHIFT TO SURVIVE</span>
+      </footer>
+    </section>
+
+    <section id="pauseScreen" class="overlay modal-screen">
+      <div class="modal-card">
+        <div class="kicker"><i></i> SIGNAL PAUSED</div>
+        <h2>任务暂停</h2>
+        <p>引擎冷却中。按 <kbd>P</kbd> 继续，或者结束这次逃亡。</p>
+        <div class="modal-actions">
+          <button id="resumeBtn" class="primary-btn" type="button"><span>继续行驶</span><i>→</i></button>
+          <button id="pauseRestartBtn" class="ghost-btn" type="button">重新出发</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameoverScreen" class="overlay modal-screen">
+      <div class="modal-card gameover-card">
+        <div class="kicker danger"><i></i> VEHICLE DESTROYED</div>
+        <h2>车辆报废</h2>
+        <p id="gameoverText">公路吞没了你的车灯。下一次，别让尸潮追上来。</p>
+        <div class="result-grid">
+          <div><span>最终分数</span><b id="finalScore">0</b></div>
+          <div><span>行驶里程</span><b id="finalDistance">0.0<small>KM</small></b></div>
+          <div><span>击杀感染者</span><b id="finalKills">0</b></div>
+          <div><span>最高连击</span><b id="finalCombo">×1</b></div>
+        </div>
+        <div id="newRecord" class="new-record">新纪录 // NEW RECORD</div>
+        <div class="modal-actions">
+          <button id="restartBtn" class="primary-btn" type="button"><span>再次出发</span><i>↻</i></button>
+          <button id="homeBtn" class="ghost-btn" type="button">返回待机界面</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="bootError" class="boot-error">
+      <strong>无法启动 3D 引擎</strong>
+      <p>请确认浏览器已开启硬件加速，并使用最新版 Chrome / Edge。建议通过本地服务器运行本游戏。</p>
+    </div>
+  </main>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/actors.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
